@@ -14,6 +14,12 @@ public class Step {
     public Step(String text) {
         this.text = text;
 
+    }
 
+    @Override
+    public String toString() {
+        return "Step{" +
+                "text='" + text + '\'' +
+                '}';
     }
 }

@@ -18,11 +18,11 @@ public class Parser {
     }
 
     public static void main(String[] args) throws Exception {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance(); //создали фабрику строителей, сложный и грамосткий процесс (по реже выполняйте это действие)
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         // f.setValidating(false); // не делать проверку валидации
         DocumentBuilder db = dbf.newDocumentBuilder(); // создали конкретного строителя документа
         Document doc = db.parse(new File("sample.xml")); // стооитель построил документ
-        //Document - тоже является нодом, и импленментирует методы
+
         visitDoc(doc, 0);
     }
 
