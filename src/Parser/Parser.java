@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 
 public class Parser {
@@ -24,22 +25,25 @@ public class Parser {
         Document doc = db.parse(new File("sample.xml")); // стооитель построил документ
 
         visitDoc(doc, 0);
+
+        System.out.println(actions);
     }
+    static ArrayList<Action> actions = new ArrayList<>();
 
     public static void visitDoc(Node node, int level) {
-        ArrayList<Action> actions = new ArrayList<>();
 
-        NodeList list = node.getChildNodes();
+
+        NodeList list = node.getFirstChild().getChildNodes();
         for (int i = 0; i < list.getLength(); i++) {
 
             Node childNode = list.item(i); // текущий нод
+           // childNode = childNode.getFirstChild();
             process(childNode, level + 1); // обработка
             visit(childNode, level + 1, actions); // рекурсия
         }
     }
     public static void visit(Node node, int level, ArrayList<Action> actions) {
-        String act = node.getAttributes().getNamedItem("TEXT").getNodeValue();
-
+       var act = getAttributeValue(node, "TEXT");
 
         switch (act){
             case "Б-С": {
@@ -50,6 +54,7 @@ public class Parser {
                     Node childNode = list.item(i); // текущий нод
                     //process(childNode, level + 1); // обработка
                    Action action = visitAction(childNode); // рекурсия
+                    if (action.getText() != null)
                     actions.add(action);
                 }
 
@@ -65,192 +70,177 @@ public class Parser {
         Action action = new Action();
         NodeList list = node.getChildNodes();
         for (int i = 0; i < list.getLength(); i++) {
+            if (!getAttributeValue(node, "TEXT").equals("") || getAttributeValue(node, "TEXT") != null) {
 
-            Node childNode = list.item(i); // текущий нод
-            switch (childNode.getNodeName()){
-                case "attribute": {
-                   var attributes = childNode.getAttributes();
-                   if (attributes.getNamedItem("NAME").getNodeValue().equals("B Value")){
-                       action.setbValue(Integer.parseInt(attributes.getNamedItem("VALUE").getNodeValue()));
-                   }
-                    if (attributes.getNamedItem("NAME").getNodeValue().equals("Estimation")){
-                        action.setEstimation(Double.parseDouble(attributes.getNamedItem("VALUE").getNodeValue()));
+                Node childNode = list.item(i); // текущий нод
+                action.setText(getAttributeValue(node, "TEXT"));
+                switch (childNode.getNodeName()) {
+                    case "attribute": {
+                        //var attributes = childNode.getAttributes();
+                        if (getAttributeValue(childNode, "NAME").equals("B Value")) {
+                            if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                                action.setbValue(Integer.parseInt(getAttributeValue(childNode, "VALUE")));
+                            }
+                        }
+
                     }
+                    if (getAttributeValue(childNode, "NAME").equals("Estimation")) {
+                        if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                            action.setEstimation(Double.parseDouble(getAttributeValue(childNode, "VALUE")));
+                        }
+                    }
+
+                    break;
+                    case "node": {
+                        switch (getAttributeValue(childNode, "TEXT")) {
+                            case "parameters": {
+                                var parameters = fillElements(node, Parser::visitParameter);
+                                action.setParameters(parameters);
+                            }
+                            break;
+                            case "initial states": {
+                                var initialStates = fillElements(node, Parser::visitInitialState);
+                                action.setInitialStates(initialStates);
+                            }
+                            break;
+                            case "variations": {
+                                var variations = fillElements(node, Parser::visitVariation);
+                                action.setVariations(variations);
+
+                            }
+                            break;
+                            case "Steps": {
+                                var steps = fillElements(node, Parser::visitStep);
+                                action.setSteps(steps);
+                            }
+                            break;
+                        }
+                    }
+                    break;
                 }
-                break;
-                case "node": {
-                   switch (childNode.getAttributes().getNamedItem("TEXT").getNodeValue()){
-                       case "parameters":{
-                           ArrayList<Parameter> parameters = new ArrayList<>();
-                           NodeList list1 = node.getChildNodes();
-                           for (int j = 0; j < list.getLength(); j++) {
-
-                               Node childNode1 = list1.item(j); // текущий нод
-                               Parameter parameter = visitParameter(childNode1); // рекурсия
-                               parameters.add(parameter);
-                           }
-                           action.setParameters(parameters);
-
-                       }
-                       break;
-                       case "initial states":{
-                           ArrayList<InitialState> initialStates = new ArrayList<>();
-                           NodeList list1 = node.getChildNodes();
-                           for (int j = 0; j < list.getLength(); j++) {
-
-                               Node childNode1 = list1.item(j); // текущий нод
-                               InitialState initialState = visitInitialState(childNode1); // рекурсия
-                               initialStates.add(initialState);
-                           }
-                           action.setInitialStates(initialStates);
-
-                       }
-                       break;
-                       case "variations":{
-                           ArrayList<Variation> variations = new ArrayList<>();
-                           NodeList list1 = node.getChildNodes();
-                           for (int j = 0; j < list.getLength(); j++) {
-
-                               Node childNode1 = list1.item(j); // текущий нод
-                               Variation variation = visitVariation(childNode1); // рекурсия
-                               variations.add(variation);
-                           }
-                           action.setVariations(variations);
-
-                       }
-                       break;
-                       case "Steps":{
-                           ArrayList<Step> steps = new ArrayList<>();
-                           NodeList list1 = node.getChildNodes();
-                           for (int j = 0; j < list.getLength(); j++) {
-
-                               Node childNode1 = list1.item(j); // текущий нод
-                               Step step = visitStep(childNode1); // рекурсия
-                               steps.add(step);
-                           }
-                           action.setSteps(steps);
-                       }
-                       break;
-                   }
-
-                }
-                break;
             }
-
-
+            else break;
         }
-       // action.setbValue(node.getAttributes().getNamedItem().getNodeValue());
+
        return action ;
     }
 
     public static Variation visitVariation(Node node){
-        Variation variation = new Variation(node.getAttributes().getNamedItem("TEXT").getNodeValue());
+        Variation variation = new Variation(getAttributeValue(node, "TEXT"));
+
         NodeList list = node.getChildNodes();
         for (int i = 0; i < list.getLength(); i++) {
+            if (!getAttributeValue(node, "TEXT").equals("") || getAttributeValue(node, "TEXT") != null) {
 
-            Node childNode = list.item(i); // текущий нод
-            switch (childNode.getNodeName()){
-                case "attribute": {
-                    var attributes = childNode.getAttributes();
-                    if (attributes.getNamedItem("NAME").getNodeValue().equals("done")){
-                        variation.setDone(attributes.getNamedItem("VALUE").getNodeValue());
+                Node childNode = list.item(i); // текущий нод
+                variation.setText(getAttributeValue(node, "TEXT"));
+                switch (childNode.getNodeName()) {
+                    case "attribute": {
+                        var attributes = childNode.getAttributes();
+                        if (getAttributeValue(childNode, "NAME").equals("done")) {
+                            if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                                variation.setDone(getAttributeValue(childNode, "VALUE"));
+                            }
+                        }
+
+                        if (getAttributeValue(childNode, "NAME").equals("type")) {
+                            if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                                variation.setType(getAttributeValue(childNode, "VALUE"));
+                            }
+                        }
+
                     }
-                    if (attributes.getNamedItem("NAME").getNodeValue().equals("type")){
-                        variation.setType(attributes.getNamedItem("VALUE").getNodeValue());
+                    break;
+                    case "node": {
+                        switch (getAttributeValue(childNode, "TEXT")) {
+                            case "final states": {
+                                var finalStates = fillElements(node, Parser::visitFinalState);
+                                variation.setFinalStates(finalStates);
+                            }
+                            break;
+                            case "initial states": {
+                                var initialStates = fillElements(node, Parser::visitInitialState);
+                                variation.setInitialStates(initialStates);
+                            }
+                            break;
+
+                            case "Steps": {
+                                var steps = fillElements(node, Parser::visitStep);
+                                variation.setSteps(steps);
+                            }
+                            break;
+                        }
                     }
+                    break;
                 }
-                break;
-                case "node": {
-                    switch (childNode.getAttributes().getNamedItem("TEXT").getNodeValue()){
-                        case "final states":{
-                            ArrayList<FinalState> finalStates = new ArrayList<>();
-                            NodeList list1 = node.getChildNodes();
-                            for (int j = 0; j < list.getLength(); j++) {
-
-                                Node childNode1 = list1.item(j); // текущий нод
-                                FinalState finalState = visitFinalState(childNode1); // рекурсия
-                                finalStates.add(finalState);
-                            }
-                            variation.setFinalStates(finalStates);
-
-                        }
-                        break;
-                        case "initial states":{
-                            ArrayList<InitialState> initialStates = new ArrayList<>();
-                            NodeList list1 = node.getChildNodes();
-                            for (int j = 0; j < list.getLength(); j++) {
-
-                                Node childNode1 = list1.item(j); // текущий нод
-                                InitialState initialState = visitInitialState(childNode1); // рекурсия
-                                initialStates.add(initialState);
-                            }
-                            variation.setInitialStates(initialStates);
-
-                        }
-                        break;
-
-                        case "Steps":{
-                            ArrayList<Step> steps = new ArrayList<>();
-                            NodeList list1 = node.getChildNodes();
-                            for (int j = 0; j < list.getLength(); j++) {
-
-                                Node childNode1 = list1.item(j); // текущий нод
-                                Step step = visitStep(childNode1); // рекурсия
-                                steps.add(step);
-                            }
-                            variation.setSteps(steps);
-                        }
-                        break;
-                    }
-
-                }
-                break;
             }
-
+            else break;
 
         }
-        // action.setbValue(node.getAttributes().getNamedItem().getNodeValue());
         return variation ;
     }
 
     public static Parameter visitParameter(Node node){
-        Parameter parameter = new Parameter(node.getAttributes().getNamedItem("TEXT").getNodeValue());
+        Parameter parameter = new Parameter(getAttributeValue(node, "TEXT"));
         NodeList list = node.getChildNodes();
         for (int i = 0; i < list.getLength(); i++) {
-
             Node childNode = list.item(i);
             var attributes = childNode.getAttributes();
-            switch (attributes.getNamedItem("NAME").getNodeValue()){
+            switch (getAttributeValue(childNode, "NAME")){
                 case "diapason": {
-                    parameter.setDiapason(attributes.getNamedItem("VALUE").getNodeValue());
+                    //parameter.setDiapason(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        parameter.setDiapason(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
                 case "min": {
-                    parameter.setMin(Integer.parseInt(attributes.getNamedItem("VALUE").getNodeValue()));
+                    //parameter.setMin(Integer.parseInt(attributes.getNamedItem("VALUE").getNodeValue()));
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        parameter.setMin(Integer.parseInt(getAttributeValue(childNode, "VALUE")));
+                    }
                 }
                 break;
                 case "max": {
-                    parameter.setMax(Integer.parseInt(attributes.getNamedItem("VALUE").getNodeValue()));
+                    //parameter.setMax(Integer.parseInt(attributes.getNamedItem("VALUE").getNodeValue()));
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        parameter.setMax(Integer.parseInt(getAttributeValue(childNode, "VALUE")));
+                    }
                 }
                 break;
                 case "valid": {
-                    parameter.setValid(attributes.getNamedItem("VALUE").getNodeValue());
+                    //parameter.setValid(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        parameter.setValid(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
                 case "not valid": {
-                    parameter.setNotValid(attributes.getNamedItem("VALUE").getNodeValue());
+                    //parameter.setNotValid(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        parameter.setNotValid(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
                 case "required": {
-                    parameter.setRequired(Boolean.parseBoolean(attributes.getNamedItem("VALUE").getNodeValue()));
+                    //parameter.setRequired(Boolean.parseBoolean(attributes.getNamedItem("VALUE").getNodeValue()));
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        parameter.setRequired(Boolean.parseBoolean(getAttributeValue(childNode, "VALUE")));
+                    }
                 }
                 break;
                 case "available": {
-                    parameter.setAvailable(Boolean.parseBoolean(attributes.getNamedItem("VALUE").getNodeValue()));
+                   // parameter.setAvailable(Boolean.parseBoolean(attributes.getNamedItem("VALUE").getNodeValue()));
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        parameter.setAvailable(Boolean.parseBoolean(getAttributeValue(childNode, "VALUE")));
+                    }
                 }
                 break;
                 case "type": {
-                    parameter.setType(attributes.getNamedItem("VALUE").getNodeValue());
+                    //parameter.setType(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        parameter.setType(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
             }
@@ -260,7 +250,7 @@ public class Parser {
     }
 
     public static Step visitStep(Node node) {
-        Step step = new Step(node.getAttributes().getNamedItem("TEXT").getNodeValue());
+        Step step = new Step(getAttributeValue(node, "TEXT"));
         return step;
     }
 
@@ -271,29 +261,47 @@ public class Parser {
 
             Node childNode = list.item(i);
             var attributes = childNode.getAttributes();
-            switch (attributes.getNamedItem("NAME").getNodeValue()){
+            switch (getAttributeValue(childNode, "NAME")){
                 case "priority": {
-                    initialState.setPriority(Integer.parseInt(attributes.getNamedItem("VALUE").getNodeValue()));
+                    //initialState.setPriority(Integer.parseInt(attributes.getNamedItem("VALUE").getNodeValue()));
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        initialState.setPriority(Integer.parseInt(getAttributeValue(childNode, "VALUE")));
+                    }
                 }
                 break;
                 case "Epic": {
-                    initialState.setEpic(attributes.getNamedItem("VALUE").getNodeValue());
+                   // initialState.setEpic(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        initialState.setEpic(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
                 case "Page": {
-                    initialState.setPage(attributes.getNamedItem("VALUE").getNodeValue());
+                   // initialState.setPage(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        initialState.setPage(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
                 case "Table": {
-                    initialState.setTable(attributes.getNamedItem("VALUE").getNodeValue());
+                    //initialState.setTable(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        initialState.setTable(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
                 case "Value": {
-                    initialState.setValue(attributes.getNamedItem("VALUE").getNodeValue());
+                    //initialState.setValue(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        initialState.setValue(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
                 case "object": {
-                    initialState.setObject(attributes.getNamedItem("VALUE").getNodeValue());
+                    //initialState.setObject(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        initialState.setObject(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
 
@@ -310,29 +318,48 @@ public class Parser {
 
             Node childNode = list.item(i);
             var attributes = childNode.getAttributes();
-            switch (attributes.getNamedItem("NAME").getNodeValue()){
+            switch (//attributes.getNamedItem("NAME").getNodeValue()
+            getAttributeValue(childNode, "NAME")){
                 case "priority": {
-                    finalState.setPriority(Integer.parseInt(attributes.getNamedItem("VALUE").getNodeValue()));
+                    //finalState.setPriority(Integer.parseInt(attributes.getNamedItem("VALUE").getNodeValue()));
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        finalState.setPriority(Integer.parseInt(getAttributeValue(childNode, "VALUE")));
+                    }
                 }
                 break;
                 case "Epic": {
-                    finalState.setEpic(attributes.getNamedItem("VALUE").getNodeValue());
+                    //finalState.setEpic(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        finalState.setEpic(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
                 case "Page": {
-                    finalState.setPage(attributes.getNamedItem("VALUE").getNodeValue());
+                    //finalState.setPage(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        finalState.setPage(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
                 case "Table": {
-                    finalState.setTable(attributes.getNamedItem("VALUE").getNodeValue());
+                   // finalState.setTable(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        finalState.setTable(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
                 case "Value": {
-                    finalState.setValue(attributes.getNamedItem("VALUE").getNodeValue());
+                   // finalState.setValue(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        finalState.setValue(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
                 case "object": {
-                    finalState.setObject(attributes.getNamedItem("VALUE").getNodeValue());
+                    //finalState.setObject(attributes.getNamedItem("VALUE").getNodeValue());
+                    if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                        finalState.setObject(getAttributeValue(childNode, "VALUE"));
+                    }
                 }
                 break;
 
@@ -354,6 +381,31 @@ public class Parser {
         System.out.println();
     }
 
+    private static <TElement> ArrayList<TElement> fillElements (Node node, Function<Node, TElement> function){
+        ArrayList<TElement> tElements = new ArrayList<>();
+        NodeList list = node.getChildNodes();
+        for (int j = 0; j < list.getLength(); j++) {
 
+            Node childNode = list.item(j); // текущий нод
+            TElement tElement = function.apply(childNode); // рекурсия
+            tElements.add(tElement);
+        }
+        return tElements;
+    }
+
+    private static String getAttributeValue(Node node, String attributeName){
+        var atrib = node.getAttributes();
+        if (atrib == null || atrib.getLength() == 0) return"";
+        var at = atrib.getNamedItem(attributeName);
+        if (at == null) return"";
+        return at.getNodeValue();
+    }
+
+    private static void setAttrib(Node childNode, String param, Function function){
+   if (getAttributeValue(childNode, "NAME").equals(param))
+        if (!getAttributeValue(childNode, "VALUE").equals("")) {
+            function.apply(Integer.parseInt(getAttributeValue(childNode, "VALUE")));
+        }
+    }
 
 }
