@@ -126,7 +126,7 @@ public class Parser {
     }
 
     public static Variation visitVariation(Node node){
-        Variation variation = new Variation(getAttributeValue(node, "TEXT"));
+        Variation variation = new Variation();
 
         NodeList list = node.getChildNodes();
         for (int i = 0; i < list.getLength(); i++) {
@@ -388,7 +388,12 @@ public class Parser {
 
             Node childNode = list.item(j); // текущий нод
             TElement tElement = function.apply(childNode); // рекурсия
-            tElements.add(tElement);
+            if (tElement != null) {
+                if(tElement.getClass() == Variation.class) {
+                    if (((Variation) tElement).getText() != null)
+                    tElements.add(tElement);
+                }
+            }
         }
         return tElements;
     }

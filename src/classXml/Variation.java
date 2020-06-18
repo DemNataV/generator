@@ -12,9 +12,6 @@ public class Variation {
     ArrayList<FinalState> finalStates;
     ArrayList<InitialState> initialStates;
 
-    public Variation(String text) {
-        this.text = text;
-    }
 
     public String getText() {
         return text;
