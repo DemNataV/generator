@@ -40,4 +40,12 @@ public class ActionWithVariation {
             }
         return actionWithVariations;
     }
+
+    @Override
+    public String toString() {
+        return "ActionWithVariation{" +
+                "action=" + action +
+                ", variation=" + variation +
+                '}';
+    }
 }
