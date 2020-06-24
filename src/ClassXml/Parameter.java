@@ -1,4 +1,4 @@
-package classXml;
+package ClassXml;
 
 public class Parameter {
     String text;

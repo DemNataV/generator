@@ -1,6 +1,6 @@
 package Parser;
 
-import classXml.*;
+import ClassXml.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -28,7 +28,7 @@ public class Parser {
 
         System.out.println(actions);
     }
-    static ArrayList<Action> actions = new ArrayList<>();
+   public static ArrayList<Action> actions = new ArrayList<>();
 
     public static void visitDoc(Node node, int level) {
 
@@ -54,7 +54,7 @@ public class Parser {
                     Node childNode = list.item(i); // текущий нод
                     //process(childNode, level + 1); // обработка
                    Action action = visitAction(childNode); // рекурсия
-                    if (action.getText() != null)
+                    if (action != null)
                     actions.add(action);
                 }
 
@@ -67,13 +67,18 @@ public class Parser {
     }
 
     public static Action visitAction(Node node){
+        if (getAttributeValue(node, "TEXT").equals("") || getAttributeValue(node, "TEXT") == null) {
+            return null;
+        }
         Action action = new Action();
+        action.setText(getAttributeValue(node, "TEXT"));
         NodeList list = node.getChildNodes();
+
         for (int i = 0; i < list.getLength(); i++) {
-            if (!getAttributeValue(node, "TEXT").equals("") || getAttributeValue(node, "TEXT") != null) {
+
 
                 Node childNode = list.item(i); // текущий нод
-                action.setText(getAttributeValue(node, "TEXT"));
+
                 switch (childNode.getNodeName()) {
                     case "attribute": {
                         //var attributes = childNode.getAttributes();
@@ -94,23 +99,23 @@ public class Parser {
                     case "node": {
                         switch (getAttributeValue(childNode, "TEXT")) {
                             case "parameters": {
-                                var parameters = fillElements(node, Parser::visitParameter);
+                                var parameters = fillElements(childNode, Parser::visitParameter);
                                 action.setParameters(parameters);
                             }
                             break;
                             case "initial states": {
-                                var initialStates = fillElements(node, Parser::visitInitialState);
+                                var initialStates = fillElements(childNode, Parser::visitInitialState);
                                 action.setInitialStates(initialStates);
                             }
                             break;
                             case "variations": {
-                                var variations = fillElements(node, Parser::visitVariation);
+                                var variations = fillElements(childNode, Parser::visitVariation);
                                 action.setVariations(variations);
 
                             }
                             break;
                             case "Steps": {
-                                var steps = fillElements(node, Parser::visitStep);
+                                var steps = fillElements(childNode, Parser::visitStep);
                                 action.setSteps(steps);
                             }
                             break;
@@ -118,8 +123,7 @@ public class Parser {
                     }
                     break;
                 }
-            }
-            else break;
+
         }
 
        return action ;
@@ -153,19 +157,30 @@ public class Parser {
                     break;
                     case "node": {
                         switch (getAttributeValue(childNode, "TEXT")) {
-                            case "final states": {
-                                var finalStates = fillElements(node, Parser::visitFinalState);
+                            case "final state:": {
+                                var finalStates = fillElements(childNode, Parser::visitFinalState);
                                 variation.setFinalStates(finalStates);
                             }
                             break;
                             case "initial states": {
-                                var initialStates = fillElements(node, Parser::visitInitialState);
-                                variation.setInitialStates(initialStates);
+                                NodeList listChildNode = childNode.getChildNodes();
+                                for (int j = 0; j < listChildNode.getLength(); j++) {
+                                    Node itemNode = list.item(j);
+                                    if (!getAttributeValue(itemNode, "TEXT").equals("initial state")) continue;
+                                    NodeList listItemNode = itemNode.getChildNodes();
+                                    /*for (int k = 0; k < listItemNode.getLength(); k++) {
+                                        Node itemItemNode = list.item(k);
+                                        if (!getAttributeValue(itemItemNode, "TEXT").equals("Assert:")) continue;*/
+
+                                        var initialStates = fillElements(childNode, Parser::visitInitialState);
+                                        variation.setInitialStates(initialStates);
+                                   // }
+                                }
                             }
                             break;
 
                             case "Steps": {
-                                var steps = fillElements(node, Parser::visitStep);
+                                var steps = fillElements(childNode, Parser::visitStep);
                                 variation.setSteps(steps);
                             }
                             break;
@@ -260,7 +275,7 @@ public class Parser {
         for (int i = 0; i < list.getLength(); i++) {
 
             Node childNode = list.item(i);
-            var attributes = childNode.getAttributes();
+
             switch (getAttributeValue(childNode, "NAME")){
                 case "priority": {
                     //initialState.setPriority(Integer.parseInt(attributes.getNamedItem("VALUE").getNodeValue()));
@@ -387,12 +402,13 @@ public class Parser {
         for (int j = 0; j < list.getLength(); j++) {
 
             Node childNode = list.item(j); // текущий нод
+            if (!childNode.getNodeName().equals("node")) {
+                continue;
+            }
             TElement tElement = function.apply(childNode); // рекурсия
             if (tElement != null) {
-                if(tElement.getClass() == Variation.class) {
-                    if (((Variation) tElement).getText() != null)
+
                     tElements.add(tElement);
-                }
             }
         }
         return tElements;

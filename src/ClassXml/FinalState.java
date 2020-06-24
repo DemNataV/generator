@@ -1,7 +1,7 @@
-package classXml;
+package ClassXml;
 
-public class InitialState {
-    int  priority;
+public class FinalState {
+  int  priority;
     String epic;
     String page;
     String table;

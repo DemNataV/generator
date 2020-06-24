@@ -1,4 +1,4 @@
-package classXml;
+package ClassXml;
 
 import java.util.ArrayList;
 

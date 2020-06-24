@@ -1,7 +1,7 @@
-package classXml;
+package ClassXml;
 
-public class FinalState {
-  int  priority;
+public class InitialState {
+    int  priority;
     String epic;
     String page;
     String table;
@@ -60,7 +60,7 @@ public class FinalState {
 
     @Override
     public String toString() {
-        return "FinalState{" +
+        return "InitialState{" +
                 "priority=" + priority +
                 ", epic='" + epic + '\'' +
                 ", page='" + page + '\'' +
