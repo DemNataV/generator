@@ -38,7 +38,7 @@ public TestPlan createTpBranch(ArrayList<Action> actions){
             for (int j = 0; j < scenarios.size(); j++) {
                 for (int k = 0; k <scenarios.get(i).getInitialStates().size() ; k++) {
                     var avFound = avWithFinalState.found(avWithFS, scenarios.get(i).getInitialStates().get(k));
-                    var foundAvWithIS = avWithInitialStates.creator(avFound);
+                    ArrayList<AVWithInitialStates> foundAvWithIS = avWithInitialStates.creator(avFound);
                     scenarios.get(i).getInitialStates().remove(scenarios.get(i).getInitialStates().get(k));
                     testSuite.setN(testSuite.getN()-1);
 
@@ -47,10 +47,10 @@ public TestPlan createTpBranch(ArrayList<Action> actions){
 
                     for (int l = 0; l < foundAvWithIS.size(); l++) {
 
-                        if () {
+                        if (sc.foundCountAv(foundAvWithIS.get(l).getActionWithVariation()) < 3) {
                             Scenario scen = sc;
-                            scen.getScenario().add(foundAvWithIS.get(l).getActionWithVariation());
-                            scen.getInitialStates().add(foundAvWithIS.get(l).getInitialStates());
+                            scen.getActionWithVariations().add(foundAvWithIS.get(l).getActionWithVariation());
+                            scen.getInitialStates().addAll(foundAvWithIS.get(l).getInitialStates());
 
                             testSuite.getScenarios().add(scen);
                             testSuite.setN(testSuite.getN() + foundAvWithIS.get(l).getInitialStates().size());
@@ -61,9 +61,7 @@ public TestPlan createTpBranch(ArrayList<Action> actions){
                 }
             }
         }
-
-
-
+        testPlan.testSuites.add(testSuite);
 
     }
     return testPlan;
@@ -72,22 +70,22 @@ public TestPlan createTpBranch(ArrayList<Action> actions){
 }
 
 class Scenario{
-    ArrayList<ActionWithVariation> scenario;
+    ArrayList<ActionWithVariation> actionWithVariations;
     ArrayList<InitialState> initialStates;
 
     public Scenario(ArrayList<ActionWithVariation> scenario, ArrayList<InitialState> initialStates) {
-        this.scenario = scenario;
+        this.actionWithVariations = scenario;
         this.initialStates = initialStates;
     }
 
     public Scenario() {}
 
-    public ArrayList<ActionWithVariation> getScenario() {
-        return scenario;
+    public ArrayList<ActionWithVariation> getActionWithVariations() {
+        return actionWithVariations;
     }
 
-    public void setScenario(ArrayList<ActionWithVariation> scenario) {
-        this.scenario = scenario;
+    public void setActionWithVariations(ArrayList<ActionWithVariation> scenario) {
+        this.actionWithVariations = scenario;
     }
 
     public ArrayList<InitialState> getInitialStates() {
@@ -98,10 +96,20 @@ class Scenario{
         this.initialStates = initialStates;
     }
 
+    public int foundCountAv(ActionWithVariation actionWithVariation){
+        int n = 0;
+        for (int i = 0; i < actionWithVariations.size(); i++) {
+            if (actionWithVariations.get(i).equals(actionWithVariation)){
+                n++;
+            }
+        }
+        return n;
+    }
+
     @Override
     public String toString() {
         return "Scenario{" +
-                "scenario=" + scenario +
+                "actionWithVariations=" + actionWithVariations +
                 ", initialStates=" + initialStates +
                 '}';
     }
