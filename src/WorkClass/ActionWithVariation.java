@@ -14,6 +14,10 @@ public class ActionWithVariation {
         this.variation = variation;
     }
 
+    public ActionWithVariation() {
+
+    }
+
     public Action getAction() {
         return action;
     }

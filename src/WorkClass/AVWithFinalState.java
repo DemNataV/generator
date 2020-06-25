@@ -1,6 +1,7 @@
 package WorkClass;
 
 import ClassXml.FinalState;
+import ClassXml.State;
 
 import java.util.ArrayList;
 
@@ -12,6 +13,9 @@ public class AVWithFinalState {
         this.actionWithVariation = actionWithVariation;
         this.finalState = finalState;
     }
+
+    public AVWithFinalState() { }
+
 
     public ActionWithVariation getActionWithVariation() {
         return actionWithVariation;
@@ -39,6 +43,16 @@ public class AVWithFinalState {
             }
         }
         return avWithFinalStates;
+    }
+
+    public ArrayList<ActionWithVariation> found(ArrayList<AVWithFinalState> avWithFinalStates, State initialState){
+        ArrayList<ActionWithVariation> avForFS = new ArrayList<>();
+        for (int i = 0; i < avWithFinalStates.size(); i++) {
+            if (avWithFinalStates.get(i).getFinalState().equals(initialState)){
+                avForFS. add(avWithFinalStates.get(i).getActionWithVariation());
+            }
+        }
+        return avForFS;
     }
 
     @Override

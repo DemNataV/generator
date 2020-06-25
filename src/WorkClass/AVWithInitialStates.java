@@ -13,6 +13,8 @@ public class AVWithInitialStates {
         this.initialStates = initialStates;
     }
 
+    public AVWithInitialStates() {}
+
     public ActionWithVariation getActionWithVariation() {
         return actionWithVariation;
     }
@@ -41,6 +43,8 @@ public class AVWithInitialStates {
         }
         return avWithInitialStates;
     }
+
+
 
     @Override
     public String toString() {
