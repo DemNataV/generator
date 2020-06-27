@@ -3,9 +3,7 @@ package TestPlan;
 import ClassXml.Action;
 import ClassXml.InitialState;
 import ClassXml.Variation;
-import WorkClass.AVWithFinalState;
-import WorkClass.AVWithInitialStates;
-import WorkClass.ActionWithVariation;
+import WorkClass.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +11,7 @@ import java.util.HashMap;
 public class TestGenerator {
     ArrayList<Action> actions;
 
-public TestPlan createTpBranch(ArrayList<Action> actions){
+public TestPlan createTestPlanWithoutAssert(ArrayList<Action> actions){
 
     TestPlan testPlan = new TestPlan();
 
@@ -33,8 +31,8 @@ public TestPlan createTpBranch(ArrayList<Action> actions){
         ArrayList<Scenario> scenarios = new ArrayList<Scenario>();
         scenarios. add(scenario);
 
-        TestSuite testSuite = new TestSuite(scenarios, scenario.initialStates.size());
-        while (testSuite.n > 0){
+        TestSuite testSuite = new TestSuite(scenarios, scenario.getInitialStates().size());
+        while (testSuite.getN() > 0){
             for (int j = 0; j < scenarios.size(); j++) {
                 for (int k = 0; k <scenarios.get(i).getInitialStates().size() ; k++) {
                     var avFound = avWithFinalState.found(avWithFS, scenarios.get(i).getInitialStates().get(k));
@@ -47,7 +45,7 @@ public TestPlan createTpBranch(ArrayList<Action> actions){
 
                     for (int l = 0; l < foundAvWithIS.size(); l++) {
 
-                        if (sc.foundCountAv(foundAvWithIS.get(l).getActionWithVariation()) < 3) {
+                        if (sc.foundCountAv(foundAvWithIS.get(l).getActionWithVariation()) < 3) { //проверка на зацикливание
                             Scenario scen = sc;
                             scen.getActionWithVariations().add(foundAvWithIS.get(l).getActionWithVariation());
                             scen.getInitialStates().addAll(foundAvWithIS.get(l).getInitialStates());
@@ -61,95 +59,14 @@ public TestPlan createTpBranch(ArrayList<Action> actions){
                 }
             }
         }
-        testPlan.testSuites.add(testSuite);
+        testPlan.getTestSuites().add(testSuite);
 
     }
     return testPlan;
 
 }
+
+
 }
 
-class Scenario{
-    ArrayList<ActionWithVariation> actionWithVariations;
-    ArrayList<InitialState> initialStates;
 
-    public Scenario(ArrayList<ActionWithVariation> scenario, ArrayList<InitialState> initialStates) {
-        this.actionWithVariations = scenario;
-        this.initialStates = initialStates;
-    }
-
-    public Scenario() {}
-
-    public ArrayList<ActionWithVariation> getActionWithVariations() {
-        return actionWithVariations;
-    }
-
-    public void setActionWithVariations(ArrayList<ActionWithVariation> scenario) {
-        this.actionWithVariations = scenario;
-    }
-
-    public ArrayList<InitialState> getInitialStates() {
-        return initialStates;
-    }
-
-    public void setInitialStates(ArrayList<InitialState> initialStates) {
-        this.initialStates = initialStates;
-    }
-
-    public int foundCountAv(ActionWithVariation actionWithVariation){
-        int n = 0;
-        for (int i = 0; i < actionWithVariations.size(); i++) {
-            if (actionWithVariations.get(i).equals(actionWithVariation)){
-                n++;
-            }
-        }
-        return n;
-    }
-
-    @Override
-    public String toString() {
-        return "Scenario{" +
-                "actionWithVariations=" + actionWithVariations +
-                ", initialStates=" + initialStates +
-                '}';
-    }
-}
-
-class TestSuite{
-    ArrayList<Scenario> scenarios;
-    int n;
-
-    public TestSuite(ArrayList<Scenario> scenarios, int n) {
-        this.scenarios = scenarios;
-        this.n = n;
-    }
-
-    public TestSuite() {}
-
-    public ArrayList<Scenario> getScenarios() {
-        return scenarios;
-    }
-
-    public void setScenarios(ArrayList<Scenario> scenarios) {
-        this.scenarios = scenarios;
-    }
-
-    public int getN() {
-        return n;
-    }
-
-    public void setN(int n) {
-        this.n = n;
-    }
-
-    @Override
-    public String toString() {
-        return "TestSuite{" +
-                "scenarios=" + scenarios +
-                '}';
-    }
-}
-
-class TestPlan{
-    ArrayList<TestSuite> testSuites;
-}
