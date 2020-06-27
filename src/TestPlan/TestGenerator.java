@@ -1,27 +1,25 @@
 package TestPlan;
 
 import ClassXml.Action;
-import ClassXml.InitialState;
-import ClassXml.Variation;
+import ClassXml.FinalState;
 import WorkClass.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class TestGenerator {
     ArrayList<Action> actions;
 
-public TestPlan createTestPlanWithoutAssert(ArrayList<Action> actions){
-
-    TestPlan testPlan = new TestPlan();
-
     ActionWithVariation actionWithVariation = new ActionWithVariation();
-    var av = actionWithVariation.creator(actions);
-
     AVWithInitialStates avWithInitialStates = new AVWithInitialStates();
-    var avWithIS = avWithInitialStates.creator(av);
-
     AVWithFinalState avWithFinalState = new AVWithFinalState();
+    SetOfScenarios setOfScenarios = new SetOfScenarios();
+
+
+
+public SetOfScenarios createTestPlanWithoutAssert(ArrayList<Action> actions){
+
+    var av = actionWithVariation.creator(actions);
+    var avWithIS = avWithInitialStates.creator(av);
     var avWithFS = avWithFinalState.creator(av);
 
     for (int i = 0; i < avWithIS.size(); i++) {
@@ -35,7 +33,7 @@ public TestPlan createTestPlanWithoutAssert(ArrayList<Action> actions){
         while (testSuite.getN() > 0){
             for (int j = 0; j < scenarios.size(); j++) {
                 for (int k = 0; k <scenarios.get(i).getInitialStates().size() ; k++) {
-                    var avFound = avWithFinalState.found(avWithFS, scenarios.get(i).getInitialStates().get(k));
+                    var avFound = avWithFinalState.foundAV(avWithFS, scenarios.get(i).getInitialStates().get(k));
                     ArrayList<AVWithInitialStates> foundAvWithIS = avWithInitialStates.creator(avFound);
                     scenarios.get(i).getInitialStates().remove(scenarios.get(i).getInitialStates().get(k));
                     testSuite.setN(testSuite.getN()-1);
@@ -59,9 +57,101 @@ public TestPlan createTestPlanWithoutAssert(ArrayList<Action> actions){
                 }
             }
         }
-        testPlan.getTestSuites().add(testSuite);
+        setOfScenarios.getTestSuites().add(testSuite);
 
     }
+    return setOfScenarios;
+
+}
+
+public TestPlan TestPlanWithAssert(SetOfScenarios setOfScenarios, String type, int priority){
+
+
+    TestPlan testPlan = new TestPlan();
+    for (int i = 0; i < setOfScenarios.getTestSuites().size(); i++) {
+        for (int j = 0; j < setOfScenarios.getTestSuites().get(i).getScenarios().size(); j++) {
+            ArrayList<ActionWithVariation> testWithoutAssert = new ArrayList<>();
+            for (int k = 0; k < setOfScenarios.getTestSuites().get(i).getScenarios().get(j).getActionWithVariations().size(); k++) {
+                testWithoutAssert.add(setOfScenarios.getTestSuites().get(i).getScenarios().get(j).getActionWithVariations()
+                        .get(setOfScenarios.getTestSuites().get(i).getScenarios().get(j).getActionWithVariations().size() - k));
+            }
+                switch (type){
+                   case "leaf":{
+                       for (int l = 0; l < testWithoutAssert.get(testWithoutAssert.size()-1).getVariation().getFinalStates().size(); l++) {
+                           if(testWithoutAssert.get(testWithoutAssert.size()-1).getVariation().getFinalStates().get(l).getPriority() > priority) {
+                               continue;
+                           }
+                           Test test = new Test();
+                           for (int t = 0; t < testWithoutAssert.size(); t++) {
+                               if (t != testWithoutAssert.size() - 1) {
+                                   Asserts asserts = new Asserts(testWithoutAssert.get(t), null);
+                                   test.getTest().add(asserts);
+                               } else {
+                                   ArrayList<FinalState> singleFS = new ArrayList<>();
+                                   singleFS.add(testWithoutAssert.get(testWithoutAssert.size() - 1).getVariation().getFinalStates().get(l));
+                                   Asserts asserts = new Asserts(testWithoutAssert.get(t), singleFS);
+                                   test.getTest().add(asserts);
+                               }
+                           }
+                           testPlan.getTests().add(test);
+                       }
+
+
+                   } break;
+                   case "branch":{
+
+                           Test test = new Test();
+
+                           for (int t = 0; t < testWithoutAssert.size(); t++) {
+                               if(t != testWithoutAssert.size()-1) {
+                                   Asserts asserts = new Asserts(testWithoutAssert.get(t), null);
+                                   test.getTest().add(asserts);
+                               }
+                               else {
+                                   ArrayList<FinalState> finalStatesWithFilter = new ArrayList<>();
+                                   for (int l = 0; l < testWithoutAssert.get(t).getVariation().getFinalStates().size(); l++) {
+                                       if (testWithoutAssert.get(t).getVariation().getFinalStates().get(l).getPriority() > priority) {
+                                           continue;
+                                       }
+                                       finalStatesWithFilter.add(testWithoutAssert.get(t).getVariation().getFinalStates().get(l));
+                                   }
+                                   Asserts asserts = new Asserts(testWithoutAssert.get(t), finalStatesWithFilter);
+                                   test.getTest().add(asserts);
+                               }
+                           }
+                           testPlan.getTests().add(test);
+
+
+                   }break;
+                    case"tree":{
+
+                        Test test = new Test();
+
+                        for (int t = 0; t < testWithoutAssert.size(); t++) {
+                            ArrayList<FinalState> finalStatesWithFilter = new ArrayList<>();
+                            for (int l = 0; l < testWithoutAssert.get(t).getVariation().getFinalStates().size(); l++) {
+                                if (testWithoutAssert.get(t).getVariation().getFinalStates().get(l).getPriority() > priority){
+                                    continue;
+                                }
+                                finalStatesWithFilter.add(testWithoutAssert.get(t).getVariation().getFinalStates().get(l));
+                            }
+                            Asserts asserts = new Asserts(testWithoutAssert.get(t), finalStatesWithFilter);
+                            test.getTest().add(asserts);
+                        }
+                        testPlan.getTests().add(test);
+
+                    }break;
+
+
+                }
+            }
+
+        }
+
+
+
+
+
     return testPlan;
 
 }

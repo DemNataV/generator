@@ -3,13 +3,13 @@ package WorkClass;
 import java.util.ArrayList;
 
 public class TestPlan {
-    ArrayList<TestSuite> testSuites;
+    ArrayList<Test> tests;
 
-    public ArrayList<TestSuite> getTestSuites() {
-        return testSuites;
+    public ArrayList<Test> getTests() {
+        return tests;
     }
 
-    public void setTestSuites(ArrayList<TestSuite> testSuites) {
-        this.testSuites = testSuites;
+    public void setTests(ArrayList<Test> tests) {
+        this.tests = tests;
     }
 }

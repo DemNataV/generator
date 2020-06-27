@@ -45,7 +45,7 @@ public class AVWithFinalState {
         return avWithFinalStates;
     }
 
-    public ArrayList<ActionWithVariation> found(ArrayList<AVWithFinalState> avWithFinalStates, State initialState){
+    public ArrayList<ActionWithVariation> foundAV(ArrayList<AVWithFinalState> avWithFinalStates, State initialState){
         ArrayList<ActionWithVariation> avForFS = new ArrayList<>();
         for (int i = 0; i < avWithFinalStates.size(); i++) {
             if (avWithFinalStates.get(i).getFinalState().equals(initialState)){
@@ -54,6 +54,14 @@ public class AVWithFinalState {
         }
         return avForFS;
     }
+    
+   // public ArrayList<FinalState> foundFS(ArrayList<AVWithFinalState> avWithFS, ActionWithVariation av){
+     //   for (int i = 0; i < ; i++) {
+            
+      //  }
+   // }
+
+
 
     @Override
     public String toString() {
