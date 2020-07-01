@@ -4,7 +4,7 @@ import ClassXml.InitialState;
 
 import java.util.ArrayList;
 
-public class AVWithInitialStates {
+public class AVWithInitialStates implements Comparable<AVWithInitialStates> {
     ActionWithVariation actionWithVariation;
     ArrayList<InitialState> initialStates;
 
@@ -52,5 +52,11 @@ public class AVWithInitialStates {
                 "actionWithVariation=" + actionWithVariation +
                 ", initialStates=" + initialStates +
                 '}';
+    }
+
+    @Override
+    public int compareTo(AVWithInitialStates o) {
+        return ((this.actionWithVariation.getAction().getbValue()+this.actionWithVariation.getVariation().getBValue())
+                -(o.getActionWithVariation().getAction().getbValue()+o.getActionWithVariation().getVariation().getBValue()));
     }
 }

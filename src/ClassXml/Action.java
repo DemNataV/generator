@@ -7,6 +7,9 @@ public class Action {
 
     int bValue;
     double estimation;
+    String abbreviation;
+    String link;
+
 
     ArrayList<Parameter> parameters;
     ArrayList<Step> steps;
@@ -69,12 +72,30 @@ public class Action {
         this.variations = variations;
     }
 
+    public String getAbbreviation() {
+        return abbreviation;
+    }
+
+    public void setAbbreviation(String abbreviation) {
+        this.abbreviation = abbreviation;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+
     @Override
     public String toString() {
         return "Action{" +
                 "text='" + text + '\'' +
                 ", bValue=" + bValue +
                 ", estimation=" + estimation +
+                ", abbreviation='" + abbreviation + '\'' +
+                ", link='" + link + '\'' +
                 ", parameters=" + parameters +
                 ", steps=" + steps +
                 ", initialStates=" + initialStates +

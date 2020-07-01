@@ -7,6 +7,8 @@ public class Variation {
 
     String type;
     String done;
+    String abbreviation;
+    int BValue;
 
     ArrayList<Step> steps;
     ArrayList<FinalState> finalStates;
@@ -61,12 +63,30 @@ public class Variation {
         this.initialStates = initialStates;
     }
 
+    public String getAbbreviation() {
+        return abbreviation;
+    }
+
+    public void setAbbreviation(String abbreviation) {
+        this.abbreviation = abbreviation;
+    }
+
+    public int getBValue() {
+        return BValue;
+    }
+
+    public void setBValue(int BValue) {
+        this.BValue = BValue;
+    }
+
     @Override
     public String toString() {
         return "Variation{" +
                 "text='" + text + '\'' +
                 ", type='" + type + '\'' +
                 ", done='" + done + '\'' +
+                ", abbreviation='" + abbreviation + '\'' +
+                ", BValue=" + BValue +
                 ", steps=" + steps +
                 ", finalStates=" + finalStates +
                 ", initialStates=" + initialStates +

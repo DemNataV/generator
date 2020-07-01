@@ -5,6 +5,9 @@ import ClassXml.FinalState;
 import WorkClass.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeSet;
 
 public class TestGenerator {
     ArrayList<Action> actions;
@@ -16,7 +19,7 @@ public class TestGenerator {
 
 
 
-public SetOfScenarios createTestPlanWithoutAssert(ArrayList<Action> actions){
+public SetOfScenarios createTestPlanWithoutAssert(ArrayList<Action> actions,String round){
 
     var av = actionWithVariation.creator(actions);
     var avWithIS = avWithInitialStates.creator(av);
@@ -41,16 +44,65 @@ public SetOfScenarios createTestPlanWithoutAssert(ArrayList<Action> actions){
                     Scenario sc = scenarios.get(i);
                     testSuite.getScenarios().remove(scenarios.get(i));
 
-                    for (int l = 0; l < foundAvWithIS.size(); l++) {
+                    TreeSet<AVWithInitialStates> sortFoundAvWithIS = new TreeSet<>();
+                    sortFoundAvWithIS.addAll(foundAvWithIS);
 
-                        if (sc.foundCountAv(foundAvWithIS.get(l).getActionWithVariation()) < 3) { //проверка на зацикливание
-                            Scenario scen = sc;
-                            scen.getActionWithVariations().add(foundAvWithIS.get(l).getActionWithVariation());
-                            scen.getInitialStates().addAll(foundAvWithIS.get(l).getInitialStates());
+                    switch (round) {
+                        case "All":{
+                            for (int l = 0; l < foundAvWithIS.size(); l++) {
 
-                            testSuite.getScenarios().add(scen);
-                            testSuite.setN(testSuite.getN() + foundAvWithIS.get(l).getInitialStates().size());
+                                if (sc.foundCountAv(foundAvWithIS.get(l).getActionWithVariation()) < 3) { //проверка на зацикливание
+                                    Scenario scen = sc;
+                                    scen.getActionWithVariations().add(foundAvWithIS.get(l).getActionWithVariation());
+                                    scen.getInitialStates().addAll(foundAvWithIS.get(l).getInitialStates());
+
+                                    testSuite.getScenarios().add(scen);
+                                    testSuite.setN(testSuite.getN() + foundAvWithIS.get(l).getInitialStates().size());
+                                }
+                            }
                         }
+                        case "Max":{
+
+                            if (sc.foundCountAv(sortFoundAvWithIS.first().getActionWithVariation()) < 3) { //проверка на зацикливание
+                                Scenario scen = sc;
+                                scen.getActionWithVariations().add(sortFoundAvWithIS.first().getActionWithVariation());
+                                scen.getInitialStates().addAll(sortFoundAvWithIS.first().getInitialStates());
+
+                                testSuite.getScenarios().add(scen);
+                                testSuite.setN(testSuite.getN() + sortFoundAvWithIS.first().getInitialStates().size());
+                            }
+                        }
+                        case "Random":
+                            HashMap<AVWithInitialStates, Integer> weigthFoundAvWithIS = new HashMap<>();
+                            int n = 0;
+
+                        {for (int l = 0; l < foundAvWithIS.size(); l++) {
+                            n = n + foundAvWithIS.get(l).getActionWithVariation().getAction().getbValue() +
+                                    foundAvWithIS.get(l).getActionWithVariation().getVariation().getBValue();
+                            weigthFoundAvWithIS.put(foundAvWithIS.get(l), n);
+                        }
+
+                        int p = (int)(Math.random()*n+1);
+
+                        AVWithInitialStates randomFoundAvWithIS = new AVWithInitialStates();
+
+                            for (Map.Entry<AVWithInitialStates, Integer> entry : weigthFoundAvWithIS.entrySet()) {
+                                if(entry.getValue() >= p){
+                                    randomFoundAvWithIS = entry.getKey();
+                                    break;
+                                };
+                            }
+
+                            if (sc.foundCountAv(randomFoundAvWithIS.getActionWithVariation()) < 3) { //проверка на зацикливание
+                                Scenario scen = sc;
+                                scen.getActionWithVariations().add(randomFoundAvWithIS.getActionWithVariation());
+                                scen.getInitialStates().addAll(randomFoundAvWithIS.getInitialStates());
+
+                                testSuite.getScenarios().add(scen);
+                                testSuite.setN(testSuite.getN() + randomFoundAvWithIS.getInitialStates().size());
+                            }
+                        }
+
                     }
 
 
@@ -148,13 +200,14 @@ public TestPlan TestPlanWithAssert(SetOfScenarios setOfScenarios, String type, i
 
         }
 
-
-
-
-
     return testPlan;
 
 }
+
+public void APITest(TestPlan testPlan){
+
+}
+
 
 
 }

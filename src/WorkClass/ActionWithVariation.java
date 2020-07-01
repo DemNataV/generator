@@ -5,7 +5,7 @@ import ClassXml.Variation;
 
 import java.util.ArrayList;
 
-public class ActionWithVariation {
+public class ActionWithVariation implements Comparable<ActionWithVariation> {
     Action action;
     Variation variation;
 
@@ -52,4 +52,11 @@ public class ActionWithVariation {
                 ", variation=" + variation +
                 '}';
     }
+
+    @Override
+    public int compareTo(ActionWithVariation o) {
+        return ((this.getAction().getbValue()+this.getVariation().getBValue())-(o.getAction().getbValue()+o.getVariation().getBValue()));
+    }
+
+
 }

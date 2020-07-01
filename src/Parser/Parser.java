@@ -22,7 +22,7 @@ public class Parser {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         // f.setValidating(false); // не делать проверку валидации
         DocumentBuilder db = dbf.newDocumentBuilder(); // создали конкретного строителя документа
-        Document doc = db.parse(new File("sample.xml")); // стооитель построил документ
+        Document doc = db.parse(new File("new_version.mm")); // стооитель построил документ
 
         visitDoc(doc, 0);
 
@@ -87,11 +87,20 @@ public class Parser {
                                 action.setbValue(Integer.parseInt(getAttributeValue(childNode, "VALUE")));
                             }
                         }
-
-                    }
-                    if (getAttributeValue(childNode, "NAME").equals("Estimation")) {
-                        if (!getAttributeValue(childNode, "VALUE").equals("")) {
-                            action.setEstimation(Double.parseDouble(getAttributeValue(childNode, "VALUE")));
+                        if (getAttributeValue(childNode, "NAME").equals("Estimation")) {
+                            if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                                action.setEstimation(Double.parseDouble(getAttributeValue(childNode, "VALUE")));
+                            }
+                        }
+                        if (getAttributeValue(childNode, "NAME").equals("abbreviation")) {
+                            if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                                action.setAbbreviation(getAttributeValue(childNode, "VALUE"));
+                            }
+                        }
+                        if (getAttributeValue(childNode, "NAME").equals("link")) {
+                            if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                                action.setLink(getAttributeValue(childNode, "VALUE"));
+                            }
                         }
                     }
 
@@ -150,6 +159,16 @@ public class Parser {
                         if (getAttributeValue(childNode, "NAME").equals("type")) {
                             if (!getAttributeValue(childNode, "VALUE").equals("")) {
                                 variation.setType(getAttributeValue(childNode, "VALUE"));
+                            }
+                        }
+                        if (getAttributeValue(childNode, "NAME").equals("B Value")) {
+                            if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                                variation.setBValue(Integer.parseInt(getAttributeValue(childNode, "VALUE")));
+                            }
+                        }
+                        if (getAttributeValue(childNode, "NAME").equals("abbreviation")) {
+                            if (!getAttributeValue(childNode, "VALUE").equals("")) {
+                                variation.setAbbreviation(getAttributeValue(childNode, "VALUE"));
                             }
                         }
 
