@@ -102,10 +102,7 @@ public SetOfScenarios createTestPlanWithoutAssert(ArrayList<Action> actions,Stri
                                 testSuite.setN(testSuite.getN() + randomFoundAvWithIS.getInitialStates().size());
                             }
                         }
-
                     }
-
-
                 }
             }
         }
@@ -147,8 +144,6 @@ public TestPlan TestPlanWithAssert(SetOfScenarios setOfScenarios, String type, i
                            }
                            testPlan.getTests().add(test);
                        }
-
-
                    } break;
                    case "branch":{
 
@@ -172,8 +167,6 @@ public TestPlan TestPlanWithAssert(SetOfScenarios setOfScenarios, String type, i
                                }
                            }
                            testPlan.getTests().add(test);
-
-
                    }break;
                     case"tree":{
 
@@ -193,22 +186,17 @@ public TestPlan TestPlanWithAssert(SetOfScenarios setOfScenarios, String type, i
                         testPlan.getTests().add(test);
 
                     }break;
-
-
                 }
             }
 
         }
 
     return testPlan;
-
 }
 
 public void APITest(TestPlan testPlan){
 
 }
-
-
 
 }
 
