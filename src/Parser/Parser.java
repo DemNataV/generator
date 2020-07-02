@@ -184,7 +184,7 @@ public class Parser {
                             case "initial states": {
                                 NodeList listChildNode = childNode.getChildNodes();
                                 for (int j = 0; j < listChildNode.getLength(); j++) {
-                                    Node itemNode = list.item(j);
+                                    Node itemNode = listChildNode.item(j);
                                     if (!getAttributeValue(itemNode, "TEXT").equals("initial state")) continue;
                                     NodeList listItemNode = itemNode.getChildNodes();
                                     /*for (int k = 0; k < listItemNode.getLength(); k++) {
@@ -289,6 +289,17 @@ public class Parser {
     }
 
     public static InitialState visitInitialState(Node node){
+        System.out.println(node.getTextContent());
+        if (getAttributeValue(node, "TEXT").equals("initial state")){
+           var list = node.getChildNodes();
+            for (int i = 0; i < list.getLength(); i++) {
+                if (list.item(i).getNodeName().equals("node")){
+                    node = list.item(i);
+                    break;
+                }
+            }
+        }
+
         InitialState initialState = new InitialState();
         NodeList list = node.getChildNodes();
         for (int i = 0; i < list.getLength(); i++) {
